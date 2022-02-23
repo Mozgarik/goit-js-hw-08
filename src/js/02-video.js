@@ -20,11 +20,3 @@ const throttled = throttle(getCurrentTime, THROTLE_DELAY);
 
 player.on('timeupdate', throttled);
 
-/* player.on('play', function () {
-  console.log('played the video!');
-});
-
-player.getVideoTitle().then(function (title) {
-  console.log('title:', title);
-});
- */
