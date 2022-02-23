@@ -1,31 +1,33 @@
-// Описан в документации
-import SimpleLightbox from "simplelightbox";
-// Дополнительный импорт стилей
-import "simplelightbox/dist/simple-lightbox.min.css";
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
+import { galleryItems } from './gallery-items.js';
 
-import { galleryItems } from './gallery-items';
-// Change code below this line
+const refs = {
+  galleryContainer: document.querySelector('.gallery'),
+};
 
-const insertHTML = galleryItems.reduce((divs, image) => {
-  return (
-    divs +
-    `<div class="gallery__item">
-			<a href="${image.original}" class="gallery__link">
-				<image class="gallery__image" src="${image.preview}" alt="${image.description}" loading="lazy">
-			</a>
-		</div>`
-  );
-}, '');
+const galleryMarkup = createGalleryMarkup(galleryItems);
 
-const gallery = document.querySelector('.gallery');
-gallery.insertAdjacentHTML('beforeend', `${insertHTML}`);
+refs.galleryContainer.innerHTML = galleryMarkup;
 
-const lightbox = new SimpleLightbox('.gallery .gallery__link', {
-  captions: true,
-  captionSelector: 'img',
-  captionType: 'attr',
+const galleryModalWindow = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
   captionPosition: 'bottom',
   captionDelay: 250,
-  captionClass: 'gallery__caption',
 });
+
+function createGalleryMarkup(galleryItems) {
+  return galleryItems.map(item => createGalleryItem(item)).join('');
+}
+
+function createGalleryItem({ preview, original, description }) {
+  return `
+    <a class="gallery__item" href="${original}">
+      <img
+        class="gallery__image"
+        src="${preview}"
+        alt="${description}"
+        loading="lazy"
+      />
+    </a>`;
+}

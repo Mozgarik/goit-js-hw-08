@@ -1,48 +1,38 @@
-import throttle from 'lodash/throttle';
+import throttle from 'lodash.throttle';
 
-const LOCALSTORAGE_KEY = 'feedback-form-state';
-const THROTLE_DELAY = 500;
+const formEl = document.querySelector('form');
+const formData = {};
+const STORAGE_KEY_FORM = 'feedback-form-state';
 
-const form = document.querySelector('.feedback-form');
+fillFormFromStorage();
 
-function fillForm(fields) {
-  Array.prototype.forEach.call(form.elements, element => {
-    if (element.type != 'submit' && fields[element.name] != '') {
-      element.value = fields[element.name];
-    }
+formEl.addEventListener('input', throttle(onFormInput, 500));
+
+formEl.addEventListener('submit', onFormSubmit);
+
+function fillFormFromStorage() {
+  const dataFormSaved = JSON.parse(localStorage.getItem(STORAGE_KEY_FORM));
+  if (dataFormSaved) {
+    Object.keys(dataFormSaved).forEach(keyName => {
+      const savedValue = dataFormSaved[keyName];
+
+      formData[keyName] = savedValue;
+      formEl.elements[keyName].value = savedValue;
+    });
+  }
+}
+
+function onFormInput(evt) {
+  formData[evt.target.name] = evt.target.value;
+  localStorage.setItem(STORAGE_KEY_FORM, JSON.stringify(formData));
+}
+
+function onFormSubmit(evt) {
+  evt.preventDefault();
+  evt.target.reset();
+  localStorage.removeItem(STORAGE_KEY_FORM);
+  console.log(formData);
+  Object.keys(formData).forEach(keyName => {
+    delete formData[keyName];
   });
 }
-
-let fields = JSON.parse(localStorage.getItem(LOCALSTORAGE_KEY));
-if (fields != null) {
-  fillForm(fields);
-} else {
-  fields = {};
-}
-
-function saveForm(elements) {
-  Array.prototype.forEach.call(elements, element => {
-    if (element.type != 'submit') {
-      fields[element.name] = element.value;
-    }
-  });
-
-  localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(fields));
-}
-
-const throttled = throttle(saveForm, THROTLE_DELAY);
-
-function checkForm(event) {
-  throttled(event.currentTarget.elements);
-}
-
-form.addEventListener('input', checkForm);
-
-function handleSubmit(event) {
-  event.preventDefault();
-  event.currentTarget.reset();
-  localStorage.clear();
-  console.log(fields);
-}
-
-form.addEventListener('submit', handleSubmit);
